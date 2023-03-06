@@ -1,14 +1,15 @@
 import os
 
 import pygame
-import random
 
 # This is a main class of the game, it does all the processing that the game requires.
 
 # GAME SETTINGS PARAMETERS
 # TODO: move this to SETTINGS.CFG file in specific savegame directory
-WIDTH = 1280
-HEIGHT = 720
+from pygame import DOUBLEBUF, RESIZABLE, HWSURFACE, VIDEORESIZE
+
+WIDTH = 1920
+HEIGHT = 1080
 FPS = 144
 
 VERSION = "v0.10"
@@ -27,7 +28,7 @@ pygame.init()
 pygame.mixer.init()
 
 # Create a display with custom WIDTH and HEIGHT.
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((WIDTH, HEIGHT), HWSURFACE | DOUBLEBUF | RESIZABLE)
 
 # Set the game window title.
 pygame.display.set_caption("The Endless Journey " + VERSION)
@@ -39,8 +40,14 @@ SPRITES = pygame.sprite.Group()
 # Game Assets initialization.
 GAME_DIR = os.path.dirname(__file__)
 SPRITES_DIR = os.path.join(os.path.join(GAME_DIR, 'assets'), 'sprites')
-PLAYER_SPACESHIP_SPRITE = pygame.image.load(os.path.join(os.path.join(SPRITES_DIR, 'spaceship'), 'SMALL_BLUE_SPIKED_SHIP.PNG')).convert()
+BACKGROUNDS = os.path.join(os.path.join(GAME_DIR, 'assets'), 'bitmaps')
+FONTS = os.path.join(os.path.join(GAME_DIR, 'assets'), 'fonts')
 
+PLAYER_SPACESHIP_SPRITE = pygame.image.load(
+    os.path.join(os.path.join(SPRITES_DIR, 'spaceship'), 'SMALL_BLUE_SPIKED_SHIP.PNG')).convert()
+BACKGROUND_MAINMENU = pygame.image.load(
+    os.path.join(BACKGROUNDS, 'MAINMENU.PNG')).convert()
+BACKGROUND_MAINMENU = pygame.transform.scale(BACKGROUND_MAINMENU, (WIDTH, WIDTH * 2.15))
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -95,19 +102,61 @@ class Player(pygame.sprite.Sprite):
 PLAYER = Player()
 SPRITES.add(PLAYER)
 
-RUNNING = True;
-while RUNNING:
-    CLOCK.tick(FPS)
+def get_font(size):
+    return pygame.font.Font(os.path.join(FONTS, "FONT.TTF"), size)
 
-    for event in pygame.event.get():
-        # We are closing our game using the button.
-        if event.type == pygame.QUIT:
-            running = False
-            pygame.display.quit()
-            pygame.quit()
 
-    SPRITES.update()
+def MainMenu():
+    RUNNING = True;
+    screen.blit(BACKGROUND_MAINMENU, (0, 0))
 
-    screen.fill((0, 0, 0))
-    SPRITES.draw(screen)
+
+    MENU_TEXT = get_font(int(HEIGHT / 10)).render("The Endless Journey", True, (0, 0, 0))
+    MENU_TEXT.set_alpha(125)
+    MENU_RECT = MENU_TEXT.get_rect(center=(WIDTH / 2, 100))
+
+    screen.blit(MENU_TEXT, MENU_RECT)
     pygame.display.flip()
+
+    while RUNNING:
+        MENU_MOUSE_POS = pygame.mouse.get_pos()
+
+        for event in pygame.event.get():
+            # We are closing our game using the button.
+            if event.type == pygame.QUIT:
+                RUNNING = False
+                pygame.display.quit()
+                pygame.quit()
+            if event.type == VIDEORESIZE:
+                screen.blit(pygame.transform.scale(BACKGROUND_MAINMENU, event.dict['size']), (0, 0))
+                pygame.display.flip()
+
+
+def LevelSelect():
+    e = 1
+
+
+def Options():
+    e = 1
+
+
+def Game():
+    RUNNING = True;
+    while RUNNING:
+        CLOCK.tick(FPS)
+
+        for event in pygame.event.get():
+            # We are closing our game using the button.
+            if event.type == pygame.QUIT:
+                running = False
+                pygame.display.quit()
+                pygame.quit()
+
+        SPRITES.update()
+
+        screen.fill((0, 0, 0))
+        SPRITES.draw(screen)
+        pygame.display.flip()
+
+
+MainMenu()
