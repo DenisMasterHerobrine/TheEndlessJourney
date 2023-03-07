@@ -6,7 +6,7 @@ import pygame
 
 # GAME SETTINGS PARAMETERS
 # TODO: move this to SETTINGS.CFG file in specific savegame directory
-from pygame import DOUBLEBUF, HWSURFACE, VIDEORESIZE, mouse
+from pygame import DOUBLEBUF, HWSURFACE
 
 WIDTH = 1366
 HEIGHT = 768
@@ -31,6 +31,7 @@ def draw_rect_alpha(surface, color, rect):
     shape_surf = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
     pygame.draw.rect(shape_surf, color, shape_surf.get_rect())
     surface.blit(shape_surf, rect)
+
 
 # Basic PyGame window implementation
 # Launch the game initializer.
@@ -62,6 +63,7 @@ BACKGROUND_MISSION_ONE = pygame.image.load(os.path.join(BACKGROUNDS, 'MISSION1.P
 
 BACKGROUND_MAINMENU = pygame.transform.scale(BACKGROUND_MAINMENU, (WIDTH, WIDTH * 2.15))
 BACKGROUND_MISSION_ONE = pygame.transform.scale(BACKGROUND_MISSION_ONE, (WIDTH, WIDTH * 2.5))
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -117,6 +119,7 @@ class Player(pygame.sprite.Sprite):
 PLAYER = Player()
 SPRITES.add(PLAYER)
 
+
 def get_font(size):
     return pygame.font.Font(os.path.join(FONTS, "FONT.TTF"), size)
 
@@ -170,7 +173,7 @@ def MainMenu():
 
             # Debug
             if event.type == pygame.MOUSEBUTTONDOWN:
-               print(MENU_MOUSE_POS)
+                print(MENU_MOUSE_POS)
 
             # Play button
             if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 - 75 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 25:
@@ -193,7 +196,6 @@ def MainMenu():
         pygame.display.flip()
 
 
-
 def LevelSelect():
     e = 1
 
@@ -202,8 +204,8 @@ def Options():
     e = 1
 
 
-
 def Game():
+    reverse = False
     background_y = 0;
     RUNNING = True;
     while RUNNING:
@@ -221,8 +223,15 @@ def Game():
         SPRITES.update()
         SPRITES.draw(screen)
         pygame.display.flip()
-        if background_y < 2624:
+        if not reverse:
             background_y += 0.1
+        if background_y == 2624:
+            reverse = True
+        if reverse:
+            background_y -= 0.1
+        if background_y == 0:
+            reverse = False
+
 
 def Quit():
     pygame.display.quit()
