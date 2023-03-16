@@ -1,5 +1,3 @@
-# TODO: Меню обучения
-
 import os
 import random
 
@@ -77,6 +75,7 @@ BACKGROUND_MISSION_ONE = pygame.image.load(os.path.join(BACKGROUNDS, 'MISSION1.P
 BACKGROUND_MAINMENU = pygame.transform.scale(BACKGROUND_MAINMENU, (WIDTH, WIDTH * 2.15))
 BACKGROUND_MISSION_ONE = pygame.transform.scale(BACKGROUND_MISSION_ONE, (WIDTH, WIDTH * 2.5))
 
+score = 0
 
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, center, size):
@@ -378,6 +377,7 @@ def Options():
 
 # Game Process function, game logic and all the processing goes here.
 def Game(isReset):
+    global score
     killcounter = 0
     lifecounter = 3
     dead = False
@@ -449,22 +449,22 @@ def Game(isReset):
             EXPLOSIONS.draw(screen)
 
             KILLS_TEXT = get_font(int(HEIGHT / 30)).render("Уничтожено:", True, (255, 255, 255))
-            KILLS_TEXT.set_alpha(225)
+            KILLS_TEXT.set_alpha(260)
             KILLS_RECT = KILLS_TEXT.get_rect(center=(120, 45))
             screen.blit(KILLS_TEXT, KILLS_RECT)
 
             KILLS_TEXT = get_font(int(HEIGHT / 30)).render(f"{killcounter}", True, (255, 80, 0))
-            KILLS_TEXT.set_alpha(225)
+            KILLS_TEXT.set_alpha(260)
             KILLS_RECT = KILLS_TEXT.get_rect(center=(250 + len(str(killcounter)) * 7, 45))
             screen.blit(KILLS_TEXT, KILLS_RECT)
 
             KILLS_TEXT = get_font(int(HEIGHT / 30)).render("Жизни:", True, (255, 255, 255))
-            KILLS_TEXT.set_alpha(225)
+            KILLS_TEXT.set_alpha(260)
             KILLS_RECT = KILLS_TEXT.get_rect(center=(120 + len(str(killcounter)) * 7, 95))
             screen.blit(KILLS_TEXT, KILLS_RECT)
 
             KILLS_TEXT = get_font(int(HEIGHT / 30)).render(f"{lifecounter}", True, (255, 80, 0))
-            KILLS_TEXT.set_alpha(225)
+            KILLS_TEXT.set_alpha(260)
             KILLS_RECT = KILLS_TEXT.get_rect(center=(250 + len(str(killcounter)) * 7, 95))
             screen.blit(KILLS_TEXT, KILLS_RECT)
 
@@ -481,15 +481,26 @@ def Game(isReset):
             SPRITES.draw(screen)
             EXPLOSIONS.draw(screen)
 
+            if score == 0:
+                score = killcounter
+            elif killcounter > score:
+                score = killcounter
+
             DEATH_TEXT = get_font(int(HEIGHT / 15)).render("Вы проиграли. :(", True, (255, 10, 10))
             DEATH_TEXT.set_alpha(140)
             DEATH_RECT = DEATH_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2))
             screen.blit(DEATH_TEXT, DEATH_RECT)
 
-            DEATH_TEXT = get_font(int(HEIGHT / 35)).render("Нажмите любую кнопку, чтобы вернуться в главное меню.",
+            DEATH_TEXT = get_font(int(HEIGHT / 35)).render(f"Ваш лучший результат: {score}",
                                                            True, (255, 10, 10))
             DEATH_TEXT.set_alpha(140)
             DEATH_RECT = DEATH_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 50))
+            screen.blit(DEATH_TEXT, DEATH_RECT)
+
+            DEATH_TEXT = get_font(int(HEIGHT / 35)).render("Нажмите любую кнопку, чтобы вернуться в главное меню.",
+                                                           True, (255, 10, 10))
+            DEATH_TEXT.set_alpha(140)
+            DEATH_RECT = DEATH_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 80))
             screen.blit(DEATH_TEXT, DEATH_RECT)
 
             SPRITES.remove(PLAYER)
