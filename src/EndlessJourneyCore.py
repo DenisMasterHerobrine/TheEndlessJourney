@@ -15,7 +15,7 @@ WIDTH = 1366
 HEIGHT = 768
 FPS = 144
 
-VERSION = "v0.11"
+VERSION = "v0.12"
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -62,6 +62,8 @@ GAME_DIR = os.path.dirname(__file__)
 SPRITES_DIR = os.path.join(os.path.join(GAME_DIR, 'assets'), 'sprites')
 BACKGROUNDS = os.path.join(os.path.join(GAME_DIR, 'assets'), 'bitmaps')
 FONTS = os.path.join(os.path.join(GAME_DIR, 'assets'), 'fonts')
+MUSIC = os.path.join(os.path.join(GAME_DIR, 'assets'), 'music')
+SOUNDS = os.path.join(os.path.join(GAME_DIR, 'assets'), 'sfx')
 
 BULLET_SPRITE = pygame.image.load(os.path.join(os.path.join(SPRITES_DIR, 'entities'), 'SHOTMEDIUM.PNG')).convert()
 MOB_ENEMY_SPRITE = pygame.image.load(os.path.join(os.path.join(SPRITES_DIR, 'entities'), 'ALIENSMALL.GIF')).convert()
@@ -75,7 +77,12 @@ BACKGROUND_MISSION_ONE = pygame.image.load(os.path.join(BACKGROUNDS, 'MISSION1.P
 BACKGROUND_MAINMENU = pygame.transform.scale(BACKGROUND_MAINMENU, (WIDTH, WIDTH * 2.15))
 BACKGROUND_MISSION_ONE = pygame.transform.scale(BACKGROUND_MISSION_ONE, (WIDTH, WIDTH * 2.5))
 
+# SHOOT_SOUND = pygame.mixer.Sound(os.path.join(SOUNDS, 'SHOOT.WAV'))
+# HIT_SOUND = pygame.mixer.Sound(os.path.join(SOUNDS, 'HIT.WAV'))
+# EXPLOSION_SOUND = pygame.mixer.Sound(os.path.join(SOUNDS, 'SHOOT.WAV'))
+
 score = 0
+
 
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, center, size):
@@ -184,6 +191,7 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         SPRITES.add(bullet)
         BULLETS.add(bullet)
+        # SHOOT_SOUND.play()
 
 
 # Класс пули.
@@ -214,6 +222,10 @@ def get_font(size):
 
 # Главное меню.
 def MainMenu(isReset, isFirstLaunch):
+    # Загружаем главную тему.
+    # pygame.mixer.music.load(os.path.join(MUSIC, "MAINMENU.OGG"))
+    pygame.mixer.music.set_volume(0.2)
+    # pygame.mixer.music.play(loops=-1)
     RUNNING = True;
     screen.blit(BACKGROUND_MAINMENU, (0, 0))
 
@@ -252,31 +264,39 @@ def MainMenu(isReset, isFirstLaunch):
                 pygame.quit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 - 75 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 25:
+                if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 - 75 <= MENU_MOUSE_POS[
+                    1] <= HEIGHT / 2 + 25:
                     if not isFirstLaunch:
                         Game(isReset=isReset)
+                        # pygame.mixer.music.stop()
                     else:
                         Tutorial(isReset=isReset)
+                        # pygame.mixer.music.stop()
 
-                if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 75 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 175:
+                if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 75 <= MENU_MOUSE_POS[
+                    1] <= HEIGHT / 2 + 175:
                     Options()
-                if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 225 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 325:
+                if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 225 <= MENU_MOUSE_POS[
+                    1] <= HEIGHT / 2 + 325:
                     Quit()
 
             # Play button
-            if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 - 75 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 25:
+            if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 - 75 <= MENU_MOUSE_POS[
+                1] <= HEIGHT / 2 + 25:
                 pygame.draw.rect(screen, COLOR_LIGHT, [WIDTH / 2 - 375, HEIGHT / 2 - 75, 750, 100], 4)
             else:
                 pygame.draw.rect(screen, COLOR_DARK, [WIDTH / 2 - 375, HEIGHT / 2 - 75, 750, 100], 4)
 
             # Settings
-            if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 75 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 175:
+            if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 75 <= MENU_MOUSE_POS[
+                1] <= HEIGHT / 2 + 175:
                 pygame.draw.rect(screen, COLOR_LIGHT, [WIDTH / 2 - 375, HEIGHT / 2 + 75, 750, 100], 4)
             else:
                 pygame.draw.rect(screen, COLOR_DARK, [WIDTH / 2 - 375, HEIGHT / 2 + 75, 750, 100], 4)
 
             # Quit button
-            if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 225 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 325:
+            if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 225 <= MENU_MOUSE_POS[
+                1] <= HEIGHT / 2 + 325:
                 pygame.draw.rect(screen, COLOR_LIGHT, [WIDTH / 2 - 375, HEIGHT / 2 + 225, 750, 100], 4)
             else:
                 pygame.draw.rect(screen, COLOR_DARK, [WIDTH / 2 - 375, HEIGHT / 2 + 225, 750, 100], 4)
@@ -299,19 +319,23 @@ def Tutorial(isReset):
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 200))
     screen.blit(MAIN_TEXT, MAIN_RECT)
-    MAIN_TEXT = get_font(int(HEIGHT / 30)).render("W или клавиша 'стрелка вверх' - пролететь вперёд", True, (230, 230, 230))
+    MAIN_TEXT = get_font(int(HEIGHT / 30)).render("W или клавиша 'стрелка вверх' - пролететь вперёд", True,
+                                                  (230, 230, 230))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 176))
     screen.blit(MAIN_TEXT, MAIN_RECT)
-    MAIN_TEXT = get_font(int(HEIGHT / 30)).render("A или клавиша 'стрелка влево' - пролететь влево", True, (230, 230, 230))
+    MAIN_TEXT = get_font(int(HEIGHT / 30)).render("A или клавиша 'стрелка влево' - пролететь влево", True,
+                                                  (230, 230, 230))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 148))
     screen.blit(MAIN_TEXT, MAIN_RECT)
-    MAIN_TEXT = get_font(int(HEIGHT / 30)).render("S или клавиша 'стрелка вниз' - пролететь назад", True, (230, 230, 230))
+    MAIN_TEXT = get_font(int(HEIGHT / 30)).render("S или клавиша 'стрелка вниз' - пролететь назад", True,
+                                                  (230, 230, 230))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 122))
     screen.blit(MAIN_TEXT, MAIN_RECT)
-    MAIN_TEXT = get_font(int(HEIGHT / 30)).render("D или клавиша 'стрелка вправо' - пролететь вправо", True, (230, 230, 230))
+    MAIN_TEXT = get_font(int(HEIGHT / 30)).render("D или клавиша 'стрелка вправо' - пролететь вправо", True,
+                                                  (230, 230, 230))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 96))
     screen.blit(MAIN_TEXT, MAIN_RECT)
@@ -333,7 +357,8 @@ def Tutorial(isReset):
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 80))
     screen.blit(MAIN_TEXT, MAIN_RECT)
-    MAIN_TEXT = get_font(int(HEIGHT / 30)).render("После каждого столкновения инопланетяне разлетаются.", True, (200, 200, 210))
+    MAIN_TEXT = get_font(int(HEIGHT / 30)).render("После каждого столкновения инопланетяне разлетаются.", True,
+                                                  (200, 200, 210))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 106))
     screen.blit(MAIN_TEXT, MAIN_RECT)
@@ -353,7 +378,7 @@ def Tutorial(isReset):
         for event in pygame.event.get():
             # We are closing our game using the button.
             if event.type == pygame.QUIT:
-                running = False
+                RUNNING = False
                 pygame.display.quit()
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
@@ -377,6 +402,10 @@ def Options():
 
 # Game Process function, game logic and all the processing goes here.
 def Game(isReset):
+    # pygame.mixer.music.load(os.path.join(MUSIC, "MAINMENU.OGG"))
+    pygame.mixer.music.set_volume(0.2)
+    # pygame.mixer.music.play(loops=-1)
+
     global score
     killcounter = 0
     lifecounter = 3
@@ -393,6 +422,31 @@ def Game(isReset):
 
     SPRITES.add(PLAYER)
 
+    KILLS_TEXT = get_font(int(HEIGHT / 30)).render("Уничтожено:", True, (255, 255, 255))
+    KILLS_TEXT.set_alpha(260)
+    KILLS_TEXT_RECT = KILLS_TEXT.get_rect(center=(120, 45))
+
+    KILLS_COUNT = get_font(int(HEIGHT / 30)).render(f"{killcounter}", True, (255, 80, 0))
+    KILLS_COUNT.set_alpha(260)
+    KILLS_COUNT_RECT = KILLS_COUNT.get_rect(center=(250 + len(str(killcounter)) * 7, 45))
+
+    LIVES_TEXT = get_font(int(HEIGHT / 30)).render("Жизни:", True, (255, 255, 255))
+    LIVES_TEXT.set_alpha(260)
+    LIVES_TEXT_RECT = LIVES_TEXT.get_rect(center=(120 + len(str(killcounter)) * 7, 95))
+
+    LIVES_COUNT = get_font(int(HEIGHT / 30)).render(f"{lifecounter}", True, (255, 80, 0))
+    LIVES_COUNT.set_alpha(260)
+    LIVES_COUNT_RECT = LIVES_COUNT.get_rect(center=(250 + len(str(killcounter)) * 7, 95))
+
+    ANYKEY_TEXT = get_font(int(HEIGHT / 35)).render("Нажмите любую кнопку, чтобы вернуться в главное меню.",
+                                                    True, (255, 10, 10))
+    ANYKEY_TEXT.set_alpha(140)
+    ANYKEY_TEXT_RECT = ANYKEY_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 80))
+
+    DEATH_TEXT = get_font(int(HEIGHT / 15)).render("Вы проиграли. :(", True, (255, 10, 10))
+    DEATH_TEXT.set_alpha(140)
+    DEATH_RECT = DEATH_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+
     reverse = False
     background_y = 0
     RUNNING = True
@@ -404,7 +458,7 @@ def Game(isReset):
         for event in pygame.event.get():
             # We are closing our game using the button.
             if event.type == pygame.QUIT:
-                running = False
+                RUNNING = False
                 pygame.display.quit()
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -426,6 +480,7 @@ def Game(isReset):
             explosion = Explosion(_.rect.center, 75)
             EXPLOSIONS.add(explosion)
             killcounter += 1
+            KILLS_COUNT = get_font(int(HEIGHT / 30)).render(f"{killcounter}", True, (255, 80, 0))
 
         SPRITES.update()
         EXPLOSIONS.update()
@@ -437,36 +492,33 @@ def Game(isReset):
             PLAYER.rect.bottom = HEIGHT - 10
             explosion = Explosion(hits[0].rect.center, 800)
             EXPLOSIONS.add(explosion)
+            # EXPLOSION_SOUND.play()
             SPRITES.empty()
             SPRITES.add(PLAYER)
             MOBS.empty()
+            LIVES_COUNT = get_font(int(HEIGHT / 30)).render(f"{lifecounter}", True, (255, 80, 0))
 
             if lifecounter <= 0:
                 dead = True
+
+                if score == 0:
+                    score = killcounter
+                elif killcounter > score:
+                    score = killcounter
+
+                BEST_SCORE_TEXT = get_font(int(HEIGHT / 35)).render(f"Ваш лучший результат: {score}",
+                                                                    True, (255, 10, 10))
+                BEST_SCORE_TEXT.set_alpha(140)
+                BEST_SCORE_RECT = BEST_SCORE_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 50))
 
         if not dead:
             SPRITES.draw(screen)
             EXPLOSIONS.draw(screen)
 
-            KILLS_TEXT = get_font(int(HEIGHT / 30)).render("Уничтожено:", True, (255, 255, 255))
-            KILLS_TEXT.set_alpha(260)
-            KILLS_RECT = KILLS_TEXT.get_rect(center=(120, 45))
-            screen.blit(KILLS_TEXT, KILLS_RECT)
-
-            KILLS_TEXT = get_font(int(HEIGHT / 30)).render(f"{killcounter}", True, (255, 80, 0))
-            KILLS_TEXT.set_alpha(260)
-            KILLS_RECT = KILLS_TEXT.get_rect(center=(250 + len(str(killcounter)) * 7, 45))
-            screen.blit(KILLS_TEXT, KILLS_RECT)
-
-            KILLS_TEXT = get_font(int(HEIGHT / 30)).render("Жизни:", True, (255, 255, 255))
-            KILLS_TEXT.set_alpha(260)
-            KILLS_RECT = KILLS_TEXT.get_rect(center=(120 + len(str(killcounter)) * 7, 95))
-            screen.blit(KILLS_TEXT, KILLS_RECT)
-
-            KILLS_TEXT = get_font(int(HEIGHT / 30)).render(f"{lifecounter}", True, (255, 80, 0))
-            KILLS_TEXT.set_alpha(260)
-            KILLS_RECT = KILLS_TEXT.get_rect(center=(250 + len(str(killcounter)) * 7, 95))
-            screen.blit(KILLS_TEXT, KILLS_RECT)
+            screen.blit(KILLS_COUNT, KILLS_COUNT_RECT)
+            screen.blit(KILLS_TEXT, KILLS_TEXT_RECT)
+            screen.blit(LIVES_COUNT, LIVES_COUNT_RECT)
+            screen.blit(LIVES_TEXT, LIVES_TEXT_RECT)
 
             pygame.display.flip()
             if not reverse:
@@ -481,27 +533,11 @@ def Game(isReset):
             SPRITES.draw(screen)
             EXPLOSIONS.draw(screen)
 
-            if score == 0:
-                score = killcounter
-            elif killcounter > score:
-                score = killcounter
 
-            DEATH_TEXT = get_font(int(HEIGHT / 15)).render("Вы проиграли. :(", True, (255, 10, 10))
-            DEATH_TEXT.set_alpha(140)
-            DEATH_RECT = DEATH_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2))
-            screen.blit(DEATH_TEXT, DEATH_RECT)
 
-            DEATH_TEXT = get_font(int(HEIGHT / 35)).render(f"Ваш лучший результат: {score}",
-                                                           True, (255, 10, 10))
-            DEATH_TEXT.set_alpha(140)
-            DEATH_RECT = DEATH_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 50))
             screen.blit(DEATH_TEXT, DEATH_RECT)
-
-            DEATH_TEXT = get_font(int(HEIGHT / 35)).render("Нажмите любую кнопку, чтобы вернуться в главное меню.",
-                                                           True, (255, 10, 10))
-            DEATH_TEXT.set_alpha(140)
-            DEATH_RECT = DEATH_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 80))
-            screen.blit(DEATH_TEXT, DEATH_RECT)
+            screen.blit(BEST_SCORE_TEXT, BEST_SCORE_RECT)
+            screen.blit(ANYKEY_TEXT, ANYKEY_TEXT_RECT)
 
             SPRITES.remove(PLAYER)
             MOBS.empty()
@@ -517,9 +553,11 @@ def Game(isReset):
                 if event.type == pygame.KEYDOWN:
                     RUNNING = False
                     MainMenu(isReset=True, isFirstLaunch=False)
+                    # pygame.mixer.music.stop()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     RUNNING = False
                     MainMenu(isReset=True, isFirstLaunch=False)
+                    # pygame.mixer.music.stop()
 
 
 # Constructor-callback to quit the whole game.
