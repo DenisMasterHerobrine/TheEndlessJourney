@@ -1,3 +1,10 @@
+# TODO: Звуковое сопровождение
+# TODO: Меню настроек и их конфиг
+# TODO: Меню выбора уровней (доп. контент)
+# TODO: Миссия 2 и 3 (доп. контент)
+# TODO: Запаковать в bundled exe-файл для продакшена.
+# TODO: Рефакторинг
+
 import os
 import random
 
@@ -15,7 +22,7 @@ WIDTH = 1366
 HEIGHT = 768
 FPS = 144
 
-VERSION = "v0.12"
+VERSION = "v0.12.1"
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -77,9 +84,9 @@ BACKGROUND_MISSION_ONE = pygame.image.load(os.path.join(BACKGROUNDS, 'MISSION1.P
 BACKGROUND_MAINMENU = pygame.transform.scale(BACKGROUND_MAINMENU, (WIDTH, WIDTH * 2.15))
 BACKGROUND_MISSION_ONE = pygame.transform.scale(BACKGROUND_MISSION_ONE, (WIDTH, WIDTH * 2.5))
 
-# SHOOT_SOUND = pygame.mixer.Sound(os.path.join(SOUNDS, 'SHOOT.WAV'))
-# HIT_SOUND = pygame.mixer.Sound(os.path.join(SOUNDS, 'HIT.WAV'))
-# EXPLOSION_SOUND = pygame.mixer.Sound(os.path.join(SOUNDS, 'SHOOT.WAV'))
+SHOOT_SOUND = pygame.mixer.Sound(os.path.join(SOUNDS, 'SHOOT.WAV'))
+HIT_SOUND = pygame.mixer.Sound(os.path.join(SOUNDS, 'HIT.WAV'))
+EXPLOSION_SOUND = pygame.mixer.Sound(os.path.join(SOUNDS, 'EXPLOSION.WAV'))
 
 score = 0
 
@@ -191,7 +198,7 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         SPRITES.add(bullet)
         BULLETS.add(bullet)
-        # SHOOT_SOUND.play()
+        SHOOT_SOUND.play()
 
 
 # Класс пули.
@@ -223,9 +230,9 @@ def get_font(size):
 # Главное меню.
 def MainMenu(isReset, isFirstLaunch):
     # Загружаем главную тему.
-    # pygame.mixer.music.load(os.path.join(MUSIC, "MAINMENU.OGG"))
+    pygame.mixer.music.load(os.path.join(MUSIC, "MAINMENU.OGG"))
     pygame.mixer.music.set_volume(0.2)
-    # pygame.mixer.music.play(loops=-1)
+    pygame.mixer.music.play(loops=-1)
     RUNNING = True;
     screen.blit(BACKGROUND_MAINMENU, (0, 0))
 
@@ -264,39 +271,33 @@ def MainMenu(isReset, isFirstLaunch):
                 pygame.quit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 - 75 <= MENU_MOUSE_POS[
-                    1] <= HEIGHT / 2 + 25:
+                if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 - 75 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 25:
                     if not isFirstLaunch:
                         Game(isReset=isReset)
-                        # pygame.mixer.music.stop()
+                        pygame.mixer.music.stop()
                     else:
                         Tutorial(isReset=isReset)
-                        # pygame.mixer.music.stop()
+                        pygame.mixer.music.stop()
 
-                if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 75 <= MENU_MOUSE_POS[
-                    1] <= HEIGHT / 2 + 175:
+                if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 75 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 175:
                     Options()
-                if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 225 <= MENU_MOUSE_POS[
-                    1] <= HEIGHT / 2 + 325:
+                if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 225 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 325:
                     Quit()
 
             # Play button
-            if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 - 75 <= MENU_MOUSE_POS[
-                1] <= HEIGHT / 2 + 25:
+            if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 - 75 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 25:
                 pygame.draw.rect(screen, COLOR_LIGHT, [WIDTH / 2 - 375, HEIGHT / 2 - 75, 750, 100], 4)
             else:
                 pygame.draw.rect(screen, COLOR_DARK, [WIDTH / 2 - 375, HEIGHT / 2 - 75, 750, 100], 4)
 
             # Settings
-            if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 75 <= MENU_MOUSE_POS[
-                1] <= HEIGHT / 2 + 175:
+            if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 75 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 175:
                 pygame.draw.rect(screen, COLOR_LIGHT, [WIDTH / 2 - 375, HEIGHT / 2 + 75, 750, 100], 4)
             else:
                 pygame.draw.rect(screen, COLOR_DARK, [WIDTH / 2 - 375, HEIGHT / 2 + 75, 750, 100], 4)
 
             # Quit button
-            if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 225 <= MENU_MOUSE_POS[
-                1] <= HEIGHT / 2 + 325:
+            if WIDTH / 2 - 375 <= MENU_MOUSE_POS[0] <= WIDTH / 2 + 375 and HEIGHT / 2 + 225 <= MENU_MOUSE_POS[1] <= HEIGHT / 2 + 325:
                 pygame.draw.rect(screen, COLOR_LIGHT, [WIDTH / 2 - 375, HEIGHT / 2 + 225, 750, 100], 4)
             else:
                 pygame.draw.rect(screen, COLOR_DARK, [WIDTH / 2 - 375, HEIGHT / 2 + 225, 750, 100], 4)
@@ -402,9 +403,9 @@ def Options():
 
 # Game Process function, game logic and all the processing goes here.
 def Game(isReset):
-    # pygame.mixer.music.load(os.path.join(MUSIC, "MAINMENU.OGG"))
+    pygame.mixer.music.load(os.path.join(MUSIC, "MISSION1.OGG"))
     pygame.mixer.music.set_volume(0.2)
-    # pygame.mixer.music.play(loops=-1)
+    pygame.mixer.music.play(loops=-1)
 
     global score
     killcounter = 0
@@ -479,6 +480,8 @@ def Game(isReset):
             MOBS.add(m)
             explosion = Explosion(_.rect.center, 75)
             EXPLOSIONS.add(explosion)
+            EXPLOSION_SOUND.set_volume(0.35)
+            EXPLOSION_SOUND.play()
             killcounter += 1
             KILLS_COUNT = get_font(int(HEIGHT / 30)).render(f"{killcounter}", True, (255, 80, 0))
 
@@ -492,7 +495,8 @@ def Game(isReset):
             PLAYER.rect.bottom = HEIGHT - 10
             explosion = Explosion(hits[0].rect.center, 800)
             EXPLOSIONS.add(explosion)
-            # EXPLOSION_SOUND.play()
+            EXPLOSION_SOUND.set_volume(0.85)
+            EXPLOSION_SOUND.play()
             SPRITES.empty()
             SPRITES.add(PLAYER)
             MOBS.empty()
@@ -553,11 +557,11 @@ def Game(isReset):
                 if event.type == pygame.KEYDOWN:
                     RUNNING = False
                     MainMenu(isReset=True, isFirstLaunch=False)
-                    # pygame.mixer.music.stop()
+                    pygame.mixer.music.stop()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     RUNNING = False
                     MainMenu(isReset=True, isFirstLaunch=False)
-                    # pygame.mixer.music.stop()
+                    pygame.mixer.music.stop()
 
 
 # Constructor-callback to quit the whole game.
