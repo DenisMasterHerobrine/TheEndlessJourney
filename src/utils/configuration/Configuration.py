@@ -15,6 +15,7 @@ JSON_TEMPLATE = {
     "PARALLAX_SPEED_MODIFIER": 0.1
 }
 
+
 # Creates a SETTINGS.CFG file inside savegame directory
 def createConfig():
     if not (os.path.exists(GAME_DATA_DIR)):

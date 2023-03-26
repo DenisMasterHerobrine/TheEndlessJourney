@@ -34,7 +34,7 @@ def ButtonSettingsWrapper(isReset, isFirstLaunch, resetMusic, musicVolume, sound
 WIDTH = getField('WIDTH')
 HEIGHT = getField('HEIGHT')
 FPS = getField("FPS")
-VERSION = "v0.14.3"
+VERSION = "v0.14.4"
 
 # Colors Constants
 BLACK = (0, 0, 0)
@@ -75,6 +75,10 @@ BACKGROUND_MISSION_ONE = pygame.image.load(os.path.join(BACKGROUNDS, 'MISSION1.P
 
 BACKGROUND_MAINMENU = pygame.transform.scale(BACKGROUND_MAINMENU, (WIDTH, WIDTH * 2.15))
 BACKGROUND_MISSION_ONE = pygame.transform.scale(BACKGROUND_MISSION_ONE, (WIDTH, WIDTH * 2.5))
+
+# Icon of the Game
+pygame_icon = pygame.image.load(os.path.join(SPRITES_DIR, 'ICON.PNG'))
+pygame.display.set_icon(pygame_icon)
 
 # Get sounds instances.
 SHOOT_SOUND = pygame.mixer.Sound(os.path.join(SOUNDS, 'SHOOT.WAV'))
@@ -200,7 +204,9 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         SPRITES.add(bullet)
         BULLETS.add(bullet)
+        SHOOT_SOUND.set_volume((getField("SFX_VOLUME") / 100))
         SHOOT_SOUND.play()
+
 
 
 # Класс пули.
@@ -534,7 +540,7 @@ def Game(isReset):
 
     LIVES_TEXT = get_font(int(HEIGHT / 30)).render("Жизни:", True, (255, 255, 255))
     LIVES_TEXT.set_alpha(260)
-    LIVES_TEXT_RECT = LIVES_TEXT.get_rect(center=(120 + len(str(killcounter)) * 7, 95))
+    LIVES_TEXT_RECT = LIVES_TEXT.get_rect(center=(160 + len(str(killcounter)) * 7, 95))
 
     LIVES_COUNT = get_font(int(HEIGHT / 30)).render(f"{lifecounter}", True, (255, 80, 0))
     LIVES_COUNT.set_alpha(260)
@@ -596,7 +602,7 @@ def Game(isReset):
             PLAYER.rect.bottom = HEIGHT - 10
             explosion = Explosion(hits[0].rect.center, 800)
             EXPLOSIONS.add(explosion)
-            EXPLOSION_SOUND.set_volume(getField("SFX_VOLUME") / 100 + 0.5)
+            EXPLOSION_SOUND.set_volume((getField("SFX_VOLUME") / 100)*1.5)
             EXPLOSION_SOUND.play()
             SPRITES.empty()
             SPRITES.add(PLAYER)
