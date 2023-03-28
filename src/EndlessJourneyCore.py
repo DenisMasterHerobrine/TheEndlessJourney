@@ -1,6 +1,4 @@
 # TODO: Меню настроек
-# TODO: Меню выбора уровней (доп. контент)
-# TODO: Миссия 2 и 3 (доп. контент)
 # TODO: Запаковать в bundled exe-файл для продакшена.
 
 import random
@@ -10,6 +8,7 @@ import pygame_widgets
 from pygame_widgets.button import Button
 from pygame_widgets.slider import Slider
 from pygame_widgets.textbox import TextBox
+from sys import exit
 
 from src.utils.configuration import Configuration
 from src.utils.configuration.Configuration import *
@@ -18,8 +17,11 @@ global RESET
 
 from pygame import DOUBLEBUF, HWSURFACE
 
-
 # This is a main class of the game, it does all the processing that the game requires.
+
+# Create a config, do backend stuff.
+Configuration.createConfig()
+
 
 # Wraps a Main Menu button in the Settings menu.
 def ButtonSettingsWrapper(isReset, isFirstLaunch, resetMusic, musicVolume, soundVolume, modifiers):
@@ -28,13 +30,14 @@ def ButtonSettingsWrapper(isReset, isFirstLaunch, resetMusic, musicVolume, sound
     Configuration.updateField("SPACESHIP_SPEED_MODIFIER", modifiers[0])
     Configuration.updateField("ENEMY_SPEED_MODIFIER", modifiers[1])
     Configuration.updateField("PARALLAX_SPEED_MODIFIER", modifiers[2])
+    Configuration.updateField("ENEMY_CHANCE", modifiers[3])
     MainMenu(isReset, isFirstLaunch, False)
 
 
 WIDTH = getField('WIDTH')
 HEIGHT = getField('HEIGHT')
 FPS = getField("FPS")
-VERSION = "v0.14.4"
+VERSION = "v0.15.1"
 
 # Colors Constants
 BLACK = (0, 0, 0)
@@ -135,14 +138,14 @@ class Mob(pygame.sprite.Sprite):
         self.image = MOB_ENEMY_SPRITE.convert()
         self.image.set_colorkey((252, 225, 93))
         self.rect = self.image.get_rect()
-        self.rect.x = random.randrange( WIDTH - self.rect.width)
+        self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-100, -40)
         self.speedy = random.randrange(1, 2)
         self.speedx = random.randrange(-2, 2)
 
     def update(self):
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
+        self.rect.x += (self.speedx * getField("ENEMY_SPEED_MODIFIER"))
+        self.rect.y += (self.speedy * getField("ENEMY_SPEED_MODIFIER"))
         if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
             self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -40)
@@ -169,23 +172,23 @@ class Player(pygame.sprite.Sprite):
 
         # Arrow movement keys:
         if keystate[pygame.K_LEFT]:
-            self.speedx = -4
+            self.speedx = -getField("SPACESHIP_SPEED_MODIFIER")
         if keystate[pygame.K_RIGHT]:
-            self.speedx = 4
+            self.speedx = getField("SPACESHIP_SPEED_MODIFIER")
         if keystate[pygame.K_UP]:
-            self.speedy = -4
+            self.speedy = -getField("SPACESHIP_SPEED_MODIFIER")
         if keystate[pygame.K_DOWN]:
-            self.speedy = 4
+            self.speedy = getField("SPACESHIP_SPEED_MODIFIER")
 
         # WASD movement keys:
         if keystate[pygame.K_a]:
-            self.speedx = -4
+            self.speedx = -getField("SPACESHIP_SPEED_MODIFIER")
         if keystate[pygame.K_d]:
-            self.speedx = 4
+            self.speedx = getField("SPACESHIP_SPEED_MODIFIER")
         if keystate[pygame.K_w]:
-            self.speedy = -4
+            self.speedy = -getField("SPACESHIP_SPEED_MODIFIER")
         if keystate[pygame.K_s]:
-            self.speedy = 4
+            self.speedy = getField("SPACESHIP_SPEED_MODIFIER")
 
         self.rect.x += self.speedx
         self.rect.y += self.speedy
@@ -206,7 +209,6 @@ class Player(pygame.sprite.Sprite):
         BULLETS.add(bullet)
         SHOOT_SOUND.set_volume((getField("SFX_VOLUME") / 100))
         SHOOT_SOUND.play()
-
 
 
 # Класс пули.
@@ -231,7 +233,10 @@ class Bullet(pygame.sprite.Sprite):
 def get_font(size):
     return pygame.font.Font(os.path.join(FONTS, "FONT.TTF"), size)
 
+
 PLAYER = Player()
+
+
 # Главное меню.
 def MainMenu(isReset, isFirstLaunch, resetMusic):
     # Загружаем главную тему.
@@ -348,22 +353,22 @@ def Tutorial(isReset):
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 200))
     screen.blit(MAIN_TEXT, MAIN_RECT)
     MAIN_TEXT = get_font(int(HEIGHT / 30)).render("W или клавиша 'стрелка вверх' - пролететь вперёд", True,
-                                                            (230, 230, 230))
+                                                  (230, 230, 230))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 176))
     screen.blit(MAIN_TEXT, MAIN_RECT)
     MAIN_TEXT = get_font(int(HEIGHT / 30)).render("A или клавиша 'стрелка влево' - пролететь влево", True,
-                                                            (230, 230, 230))
+                                                  (230, 230, 230))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 148))
     screen.blit(MAIN_TEXT, MAIN_RECT)
     MAIN_TEXT = get_font(int(HEIGHT / 30)).render("S или клавиша 'стрелка вниз' - пролететь назад", True,
-                                                            (230, 230, 230))
+                                                  (230, 230, 230))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 122))
     screen.blit(MAIN_TEXT, MAIN_RECT)
     MAIN_TEXT = get_font(int(HEIGHT / 30)).render("D или клавиша 'стрелка вправо' - пролететь вправо", True,
-                                                            (230, 230, 230))
+                                                  (230, 230, 230))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 96))
     screen.blit(MAIN_TEXT, MAIN_RECT)
@@ -373,12 +378,12 @@ def Tutorial(isReset):
     screen.blit(MAIN_TEXT, MAIN_RECT)
 
     MAIN_TEXT = get_font(int(HEIGHT / 30)).render("Стреляйте из оружия по инопланетянам, ", True,
-                                                            (200, 200, 210))
+                                                  (200, 200, 210))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 0))
     screen.blit(MAIN_TEXT, MAIN_RECT)
     MAIN_TEXT = get_font(int(HEIGHT / 30)).render("продержитесь наибольшее количество времени.", True,
-                                                            (200, 200, 210))
+                                                  (200, 200, 210))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 26))
     screen.blit(MAIN_TEXT, MAIN_RECT)
@@ -388,8 +393,8 @@ def Tutorial(isReset):
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 80))
     screen.blit(MAIN_TEXT, MAIN_RECT)
     MAIN_TEXT = get_font(int(HEIGHT / 30)).render("После каждого столкновения инопланетяне разлетаются.",
-                                                            True,
-                                                            (200, 200, 210))
+                                                  True,
+                                                  (200, 200, 210))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 106))
     screen.blit(MAIN_TEXT, MAIN_RECT)
@@ -400,7 +405,7 @@ def Tutorial(isReset):
     screen.blit(MAIN_TEXT, MAIN_RECT)
 
     MAIN_TEXT = get_font(int(HEIGHT / 30)).render("Нажмите любую кнопку, чтобы начать игру.", True,
-                                                            (200, 220, 200))
+                                                  (200, 220, 200))
     MAIN_TEXT.set_alpha(200)
     MAIN_RECT = MAIN_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 220))
     screen.blit(MAIN_TEXT, MAIN_RECT)
@@ -437,20 +442,45 @@ def Options(isReset, isFirstLaunch):
     Utils.draw_rect_alpha(screen, (0, 0, 0, 105), (WIDTH / 2 - 500, HEIGHT / 2 - 250, 1000, 500))
     RUNNING = True
 
-    SETTINGS_TEXT = get_font(int(HEIGHT / 20)).render("Настройки игры", True, (255, 255, 255))
-    SETTINGS_TEXT.set_alpha(200)
-    SETTINGS_TEXT_RECT = SETTINGS_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 225))
-    screen.blit(SETTINGS_TEXT, SETTINGS_TEXT_RECT)
+    SETTINGS = get_font(int(HEIGHT / 20)).render("Настройки игры", True, (255, 255, 255))
+    SETTINGS.set_alpha(200)
+    SETTINGS_TEXT_RECT = SETTINGS.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 225))
+    screen.blit(SETTINGS, SETTINGS_TEXT_RECT)
 
-    MUSIC_VOLUME_TEXT = get_font(int(HEIGHT / 20)).render("Громкость музыки:", True, (255, 255, 255))
-    MUSIC_VOLUME_TEXT.set_alpha(200)
-    MUSIC_VOLUME_RECT = MUSIC_VOLUME_TEXT.get_rect(center=(WIDTH / 2 - 240, HEIGHT / 2 - 165))
-    screen.blit(MUSIC_VOLUME_TEXT, MUSIC_VOLUME_RECT)
+    MUSIC_VOLUME = get_font(int(HEIGHT / 20)).render("Громкость музыки:", True, (255, 255, 255))
+    MUSIC_VOLUME.set_alpha(200)
+    MUSIC_VOLUME_RECT = MUSIC_VOLUME.get_rect(center=(WIDTH / 2 - 240, HEIGHT / 2 - 165))
+    screen.blit(MUSIC_VOLUME, MUSIC_VOLUME_RECT)
 
-    SETTINGS_TEXT = get_font(int(HEIGHT / 20)).render("Громкость звуков:", True, (255, 255, 255))
-    SETTINGS_TEXT.set_alpha(200)
-    MENU_RECT = SETTINGS_TEXT.get_rect(center=(WIDTH / 2 - 240, HEIGHT / 2 - 125))
-    screen.blit(SETTINGS_TEXT, MENU_RECT)
+    SFX_VOLUME = get_font(int(HEIGHT / 20)).render("Громкость звуков:", True, (255, 255, 255))
+    SFX_VOLUME.set_alpha(200)
+    SFX_VOLUME_RECT = SFX_VOLUME.get_rect(center=(WIDTH / 2 - 240, HEIGHT / 2 - 125))
+    screen.blit(SFX_VOLUME, SFX_VOLUME_RECT)
+
+    ADVANCED_SETTINGS = get_font(int(HEIGHT / 20)).render("Продвинутые настройки", True, (255, 255, 255))
+    ADVANCED_SETTINGS.set_alpha(200)
+    ADVANCED_SETTINGS_RECT = ADVANCED_SETTINGS.get_rect(center=(WIDTH / 2, HEIGHT / 2 - 55))
+    screen.blit(ADVANCED_SETTINGS, ADVANCED_SETTINGS_RECT)
+
+    ADV_SPEED_MODIFIER = get_font(int(HEIGHT / 20)).render("Скорость корабля:", True, (255, 255, 255))
+    ADV_SPEED_MODIFIER.set_alpha(200)
+    ADV_SPEED_MODIFIER_RECT = ADV_SPEED_MODIFIER.get_rect(center=(WIDTH / 2 - 240, HEIGHT / 2 - 5))
+    screen.blit(ADV_SPEED_MODIFIER, ADV_SPEED_MODIFIER_RECT)
+
+    ADV_ENEMY_SPEED_MODIFIER = get_font(int(HEIGHT / 20)).render("Скорость врагов:", True, (255, 255, 255))
+    ADV_ENEMY_SPEED_MODIFIER.set_alpha(200)
+    ADV_ENEMY_SPEED_MODIFIER_RECT = ADV_ENEMY_SPEED_MODIFIER.get_rect(center=(WIDTH / 2 - 255, HEIGHT / 2 + 35))
+    screen.blit(ADV_ENEMY_SPEED_MODIFIER, ADV_ENEMY_SPEED_MODIFIER_RECT)
+
+    ADV_PARALLAX_SPEED_MODIFIER = get_font(int(HEIGHT / 20)).render("Скорость фона:", True, (255, 255, 255))
+    ADV_PARALLAX_SPEED_MODIFIER.set_alpha(200)
+    ADV_PARALLAX_SPEED_MODIFIER_RECT = ADV_PARALLAX_SPEED_MODIFIER.get_rect(center=(WIDTH / 2 - 285, HEIGHT / 2 + 75))
+    screen.blit(ADV_PARALLAX_SPEED_MODIFIER, ADV_PARALLAX_SPEED_MODIFIER_RECT)
+
+    ADV_ENEMY_SPEED_MODIFIER = get_font(int(HEIGHT / 20)).render("Шанс появления врага:", True, (255, 255, 255))
+    ADV_ENEMY_SPEED_MODIFIER.set_alpha(200)
+    ADV_ENEMY_SPEED_MODIFIER_RECT = ADV_ENEMY_SPEED_MODIFIER.get_rect(center=(WIDTH / 2 - 187.5, HEIGHT / 2 + 120))
+    screen.blit(ADV_ENEMY_SPEED_MODIFIER, ADV_ENEMY_SPEED_MODIFIER_RECT)
 
     sliderMusicVolume = Slider(screen, int(WIDTH / 2 + 50), int(HEIGHT / 2 - 180), 350, 25, min=0,
                                max=100, step=1,
@@ -458,6 +488,7 @@ def Options(isReset, isFirstLaunch):
     sliderSoundVolume = Slider(screen, int(WIDTH / 2 + 50), int(HEIGHT / 2 - 140), 350, 25, min=0,
                                max=100, step=1,
                                handleRadius=10, initial=getField("SFX_VOLUME"))
+
     outputMusicVolume = TextBox(screen, int(WIDTH / 2 + 50 + 370), int(HEIGHT / 2 - 182.5), 62, 30,
                                 font=pygame.font.Font(os.path.join(FONTS, "FONT.TTF"), 20),
                                 borderColour=COLOR_DARK, textColour=COLOR_DARKER)
@@ -466,6 +497,36 @@ def Options(isReset, isFirstLaunch):
                                 font=pygame.font.Font(os.path.join(FONTS, "FONT.TTF"), 20),
                                 borderColour=COLOR_DARK, textColour=COLOR_DARKER)
     outputSoundVolume.disable()
+
+    sliderSpaceshipSpeedModifier = Slider(screen, int(WIDTH / 2 + 150), int(HEIGHT / 2 - 20), 250, 25, min=1,
+                                          max=100, step=1,
+                                          handleRadius=10, initial=getField("SPACESHIP_SPEED_MODIFIER"))
+    sliderEnemySpeedModifier = Slider(screen, int(WIDTH / 2 + 150), int(HEIGHT / 2 + 21.25), 250, 25, min=1,
+                                      max=10, step=1,
+                                      handleRadius=10, initial=getField("ENEMY_SPEED_MODIFIER"))
+    sliderParallaxSpeedModifier = Slider(screen, int(WIDTH / 2 + 150), int(HEIGHT / 2 + 62.5), 250, 25, min=0.01,
+                                         max=1, step=0.01,
+                                         handleRadius=10, initial=getField("PARALLAX_SPEED_MODIFIER"))
+    sliderEnemyChance = Slider(screen, int(WIDTH / 2 + 150), int(HEIGHT / 2 + 105), 250, 25, min=0,
+                               max=100, step=1,
+                               handleRadius=10, initial=getField("ENEMY_CHANCE"))
+
+    SPACESHIP_SPEED_MODIFIER = TextBox(screen, int(WIDTH / 2 + 50 + 370), int(HEIGHT / 2 - 22.5), 62, 30,
+                                       font=pygame.font.Font(os.path.join(FONTS, "FONT.TTF"), 20),
+                                       borderColour=COLOR_DARK, textColour=COLOR_DARKER)
+    SPACESHIP_SPEED_MODIFIER.disable()
+    ENEMY_SPEED_MODIFIER = TextBox(screen, int(WIDTH / 2 + 50 + 370), int(HEIGHT / 2 + 19), 62, 30,
+                                   font=pygame.font.Font(os.path.join(FONTS, "FONT.TTF"), 20),
+                                   borderColour=COLOR_DARK, textColour=COLOR_DARKER)
+    ENEMY_SPEED_MODIFIER.disable()
+    PARALLAX_SPEED_MODIFIER = TextBox(screen, int(WIDTH / 2 + 50 + 370), int(HEIGHT / 2 + 60), 62, 30,
+                                      font=pygame.font.Font(os.path.join(FONTS, "FONT.TTF"), 19),
+                                      borderColour=COLOR_DARK, textColour=COLOR_DARKER)
+    PARALLAX_SPEED_MODIFIER.disable()
+    ENEMY_CHANCE = TextBox(screen, int(WIDTH / 2 + 50 + 370), int(HEIGHT / 2 + 102.5), 62, 30,
+                           font=pygame.font.Font(os.path.join(FONTS, "FONT.TTF"), 20),
+                           borderColour=COLOR_DARK, textColour=COLOR_DARKER)
+    ENEMY_CHANCE.disable()
 
     ButtonToMainMenu = Button(
         # Mandatory Parameters
@@ -487,12 +548,17 @@ def Options(isReset, isFirstLaunch):
                                               resetMusic=False,
                                               musicVolume=sliderMusicVolume.getValue(),
                                               soundVolume=sliderSoundVolume.getValue(),
-                                              modifiers=[4, 2, 0.1])  # Function to call when clicked on
+                                              modifiers=[sliderSpaceshipSpeedModifier.getValue(), sliderEnemySpeedModifier.getValue(), float("{:.2f}".format(sliderParallaxSpeedModifier.getValue())), sliderEnemyChance.getValue()])  # Function to call when clicked on
     )
 
     while RUNNING:
         outputMusicVolume.setText(sliderMusicVolume.getValue())
         outputSoundVolume.setText(sliderSoundVolume.getValue())
+
+        SPACESHIP_SPEED_MODIFIER.setText(sliderSpaceshipSpeedModifier.getValue())
+        ENEMY_SPEED_MODIFIER.setText(sliderEnemySpeedModifier.getValue())
+        PARALLAX_SPEED_MODIFIER.setText("{:.2f}".format(sliderParallaxSpeedModifier.getValue()))
+        ENEMY_CHANCE.setText(sliderEnemyChance.getValue())
 
         pygame.mixer.music.set_volume(sliderMusicVolume.getValue() / 100)
 
@@ -510,8 +576,11 @@ def Options(isReset, isFirstLaunch):
 
 # Game Process function, game logic and all the processing goes here.
 def Game(isReset):
+    volumes = [getField("MUSIC_VOLUME"), getField("SFX_VOLUME")]
+    modifiers = [getField("SPACESHIP_SPEED_MODIFIER"), getField("ENEMY_SPEED_MODIFIER"), getField("PARALLAX_SPEED_MODIFIER"), getField("ENEMY_CHANCE")]
+
     pygame.mixer.music.load(os.path.join(MUSIC, "MISSION1.OGG"))
-    pygame.mixer.music.set_volume(getField("MUSIC_VOLUME") / 100)
+    pygame.mixer.music.set_volume(volumes[0] / 100)
     pygame.mixer.music.play(loops=-1)
 
     global score
@@ -547,7 +616,7 @@ def Game(isReset):
     LIVES_COUNT_RECT = LIVES_COUNT.get_rect(center=(250 + len(str(killcounter)) * 7, 95))
 
     ANYKEY_TEXT = get_font(int(HEIGHT / 35)).render("Нажмите любую кнопку, чтобы вернуться в главное меню.",
-                                                              True, (255, 10, 10))
+                                                    True, (255, 10, 10))
     ANYKEY_TEXT.set_alpha(140)
     ANYKEY_TEXT_RECT = ANYKEY_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 80))
 
@@ -575,7 +644,7 @@ def Game(isReset):
 
         for i in range(1):
             rand = random.randrange(1, 1000)
-            if (rand < 25):
+            if rand < modifiers[3]:
                 MOB = Mob()
                 SPRITES.add(MOB)
                 MOBS.add(MOB)
@@ -587,7 +656,7 @@ def Game(isReset):
             MOBS.add(m)
             explosion = Explosion(_.rect.center, 75)
             EXPLOSIONS.add(explosion)
-            EXPLOSION_SOUND.set_volume(getField("SFX_VOLUME") / 100)
+            EXPLOSION_SOUND.set_volume(volumes[1] / 100)
             EXPLOSION_SOUND.play()
             killcounter += 1
             KILLS_COUNT = get_font(int(HEIGHT / 30)).render(f"{killcounter}", True, (255, 80, 0))
@@ -602,7 +671,7 @@ def Game(isReset):
             PLAYER.rect.bottom = HEIGHT - 10
             explosion = Explosion(hits[0].rect.center, 800)
             EXPLOSIONS.add(explosion)
-            EXPLOSION_SOUND.set_volume((getField("SFX_VOLUME") / 100)*1.5)
+            EXPLOSION_SOUND.set_volume((volumes[1] / 100) * 1.5)
             EXPLOSION_SOUND.play()
             SPRITES.empty()
             SPRITES.add(PLAYER)
@@ -618,7 +687,7 @@ def Game(isReset):
                     score = killcounter
 
                 BEST_SCORE_TEXT = get_font(int(HEIGHT / 35)).render(f"Ваш лучший результат: {score}",
-                                                                              True, (255, 10, 10))
+                                                                    True, (255, 10, 10))
                 BEST_SCORE_TEXT.set_alpha(140)
                 BEST_SCORE_RECT = BEST_SCORE_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 50))
 
@@ -633,11 +702,11 @@ def Game(isReset):
 
             pygame.display.flip()
             if not reverse:
-                background_y += 0.1
+                background_y += modifiers[2]
             if background_y >= 2624:
                 reverse = True
             if reverse:
-                background_y -= 0.1
+                background_y -= modifiers[2]
             if background_y <= 0:
                 reverse = False
         else:
