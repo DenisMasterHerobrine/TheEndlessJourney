@@ -1,6 +1,3 @@
-# TODO: Меню настроек
-# TODO: Запаковать в bundled exe-файл для продакшена.
-
 import random
 
 import pygame
@@ -31,13 +28,13 @@ def ButtonSettingsWrapper(isReset, isFirstLaunch, resetMusic, musicVolume, sound
     Configuration.updateField("ENEMY_SPEED_MODIFIER", modifiers[1])
     Configuration.updateField("PARALLAX_SPEED_MODIFIER", modifiers[2])
     Configuration.updateField("ENEMY_CHANCE", modifiers[3])
-    MainMenu(isReset, isFirstLaunch, False)
+    MainMenu(isReset, isFirstLaunch, resetMusic)
 
 
 WIDTH = getField('WIDTH')
 HEIGHT = getField('HEIGHT')
 FPS = getField("FPS")
-VERSION = "v0.15.1"
+VERSION = "v0.15.2"
 
 # Colors Constants
 BLACK = (0, 0, 0)
@@ -548,7 +545,11 @@ def Options(isReset, isFirstLaunch):
                                               resetMusic=False,
                                               musicVolume=sliderMusicVolume.getValue(),
                                               soundVolume=sliderSoundVolume.getValue(),
-                                              modifiers=[sliderSpaceshipSpeedModifier.getValue(), sliderEnemySpeedModifier.getValue(), float("{:.2f}".format(sliderParallaxSpeedModifier.getValue())), sliderEnemyChance.getValue()])  # Function to call when clicked on
+                                              modifiers=[sliderSpaceshipSpeedModifier.getValue(),
+                                                         sliderEnemySpeedModifier.getValue(),
+                                                         float("{:.2f}".format(sliderParallaxSpeedModifier.getValue())),
+                                                         sliderEnemyChance.getValue()])
+        # Function to call when clicked on
     )
 
     while RUNNING:
@@ -577,7 +578,8 @@ def Options(isReset, isFirstLaunch):
 # Game Process function, game logic and all the processing goes here.
 def Game(isReset):
     volumes = [getField("MUSIC_VOLUME"), getField("SFX_VOLUME")]
-    modifiers = [getField("SPACESHIP_SPEED_MODIFIER"), getField("ENEMY_SPEED_MODIFIER"), getField("PARALLAX_SPEED_MODIFIER"), getField("ENEMY_CHANCE")]
+    modifiers = [getField("SPACESHIP_SPEED_MODIFIER"), getField("ENEMY_SPEED_MODIFIER"),
+                 getField("PARALLAX_SPEED_MODIFIER"), getField("ENEMY_CHANCE")]
 
     pygame.mixer.music.load(os.path.join(MUSIC, "MISSION1.OGG"))
     pygame.mixer.music.set_volume(volumes[0] / 100)
@@ -616,17 +618,20 @@ def Game(isReset):
     LIVES_COUNT_RECT = LIVES_COUNT.get_rect(center=(250 + len(str(killcounter)) * 7, 95))
 
     ANYKEY_TEXT = get_font(int(HEIGHT / 35)).render("Нажмите любую кнопку, чтобы вернуться в главное меню.",
-                                                    True, (255, 10, 10))
-    ANYKEY_TEXT.set_alpha(140)
+                                                    True, (232, 126, 118))
+    ANYKEY_TEXT.set_alpha(200)
     ANYKEY_TEXT_RECT = ANYKEY_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 80))
 
-    DEATH_TEXT = get_font(int(HEIGHT / 15)).render("Вы проиграли. :(", True, (255, 10, 10))
-    DEATH_TEXT.set_alpha(140)
+    DEATH_TEXT = get_font(int(HEIGHT / 15)).render("Вы проиграли. :(", True, (232, 126, 118))
+    DEATH_TEXT.set_alpha(200)
     DEATH_RECT = DEATH_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2))
 
     reverse = False
     background_y = 0
     RUNNING = True
+    cooldown = 0
+    once = True
+    drawOnce = True
     while RUNNING:
         screen.fill((0, 0, 0))
         screen.blit(BACKGROUND_MISSION_ONE.convert(), (0, -2624 + background_y))
@@ -641,6 +646,21 @@ def Game(isReset):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if not dead:
                     PLAYER.shoot()
+            if event.type == pygame.QUIT:
+                running = False
+                pygame.display.quit()
+                pygame.quit()
+            if dead:
+                if event.type == pygame.KEYDOWN:
+                    if cooldown > 550:
+                        RUNNING = False
+                        MainMenu(isReset=True, isFirstLaunch=False, resetMusic=True)
+                        pygame.mixer.music.stop()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if cooldown > 550:
+                        RUNNING = False
+                        MainMenu(isReset=True, isFirstLaunch=False, resetMusic=True)
+                        pygame.mixer.music.stop()
 
         for i in range(1):
             rand = random.randrange(1, 1000)
@@ -687,8 +707,8 @@ def Game(isReset):
                     score = killcounter
 
                 BEST_SCORE_TEXT = get_font(int(HEIGHT / 35)).render(f"Ваш лучший результат: {score}",
-                                                                    True, (255, 10, 10))
-                BEST_SCORE_TEXT.set_alpha(140)
+                                                                    True, (232, 126, 118))
+                BEST_SCORE_TEXT.set_alpha(200)
                 BEST_SCORE_RECT = BEST_SCORE_TEXT.get_rect(center=(WIDTH / 2, HEIGHT / 2 + 50))
 
         if not dead:
@@ -713,29 +733,25 @@ def Game(isReset):
             SPRITES.draw(screen)
             EXPLOSIONS.draw(screen)
 
+            if once == 1:
+                pygame.mixer.music.stop()
+                pygame.mixer.music.load(os.path.join(MUSIC, "ENDING.OGG"))
+                pygame.mixer.music.set_volume(volumes[0] / 100)
+                pygame.mixer.music.play(loops=1)
+                once = 0
+
+            cooldown += 1
+
+            if cooldown > 550:
+                screen.blit(ANYKEY_TEXT, ANYKEY_TEXT_RECT)
+
             screen.blit(DEATH_TEXT, DEATH_RECT)
             screen.blit(BEST_SCORE_TEXT, BEST_SCORE_RECT)
-            screen.blit(ANYKEY_TEXT, ANYKEY_TEXT_RECT)
 
             SPRITES.remove(PLAYER)
             MOBS.empty()
 
             pygame.display.flip()
-
-            for event in pygame.event.get():
-                # We are closing our game using the button.
-                if event.type == pygame.QUIT:
-                    running = False
-                    pygame.display.quit()
-                    pygame.quit()
-                if event.type == pygame.KEYDOWN:
-                    RUNNING = False
-                    MainMenu(isReset=True, isFirstLaunch=False, resetMusic=True)
-                    pygame.mixer.music.stop()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    RUNNING = False
-                    MainMenu(isReset=True, isFirstLaunch=False, resetMusic=True)
-                    pygame.mixer.music.stop()
 
 
 # Constructor-callback to quit the whole game.
