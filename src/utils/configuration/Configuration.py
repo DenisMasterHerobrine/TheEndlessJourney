@@ -31,7 +31,7 @@ def createConfig():
             SETTINGS_FILE = open(os.path.join(GAME_DATA_DIR, 'SETTINGS.JSON'), "r")
             valid = Utils.validateJSONFile(SETTINGS_FILE)
             SETTINGS_FILE.close()
-            if not (valid.__eq__("True")):
+            if not valid:
                 SETTINGS_FILE = open(os.path.join(GAME_DATA_DIR, 'SETTINGS.JSON'), "w")
                 print("[Configuration API] ERROR: Invalid configuration data! Rewriting to default parameters.")
                 SETTINGS_FILE.write(json.dumps(JSON_TEMPLATE, indent=3))
